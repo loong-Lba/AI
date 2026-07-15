@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic-RAG 前端演示</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --bg-soft: #fbfbfd;
+      --card: rgba(255, 255, 255, 0.76);
+      --card-solid: #ffffff;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-tertiary: #8e8e93;
+      --line: rgba(15, 23, 42, 0.08);
+      --line-strong: rgba(15, 23, 42, 0.14);
+      --accent: #0071e3;
+      --accent-hover: #005ecb;
+      --accent-soft: rgba(0, 113, 227, 0.1);
+      --success: #1f8f4e;
+      --success-soft: rgba(31, 143, 78, 0.1);
+      --error: #d92d20;
+      --error-soft: rgba(217, 45, 32, 0.1);
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --container: 1160px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-primary);
+      background:
+        radial-gradient(circle at top left, rgba(0, 113, 227, 0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.85), transparent 26%),
+        linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 40%, #f3f4f6 100%);
+    }
+
+    body {
+      padding: 32px 18px 48px;
+    }
+
+    .shell {
+      max-width: var(--container);
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 40px 42px;
+      border-radius: 34px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.68));
+      border: 1px solid rgba(255,255,255,0.65);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      margin-bottom: 26px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: auto -100px -120px auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 113, 227, 0.14), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(0, 113, 227, 0.12);
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.08);
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.04;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 18px 0 0;
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: 26px;
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .card.small { grid-column: span 4; }
+    .card.large { grid-column: span 12; }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(0, 113, 227, 0.08);
+      border: 1px solid rgba(0, 113, 227, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+    }
+
+    .card p.card-desc {
+      margin: 12px 0 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(15,23,42,0.08), transparent);
+      margin: 18px 0 20px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: -0.01em;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.9);
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: rgba(0, 113, 227, 0.4);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+      background: #ffffff;
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      min-height: 44px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(0, 113, 227, 0.26);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.84);
+      color: var(--text-primary);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    .btn-secondary:hover {
+      background: #ffffff;
+    }
+
+    .result {
+      margin-top: 16px;
+      min-height: 72px;
+      padding: 16px 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(15, 23, 42, 0.07);
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+      line-height: 1.72;
+    }
+
+    .result.is-loading {
+      color: var(--text-tertiary);
+      background: rgba(255,255,255,0.64);
+    }
+
+    .result.is-success {
+      border-color: rgba(31, 143, 78, 0.14);
+      background: rgba(31, 143, 78, 0.05);
+      color: #155d35;
+    }
+
+    .result.is-error {
+      border-color: rgba(217, 45, 32, 0.15);
+      background: rgba(217, 45, 32, 0.06);
+      color: #8f1f19;
+    }
+
+    .chat-card {
+      padding: 30px;
+    }
+
+    .chat-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: stretch;
+      margin-top: 22px;
+    }
+
+    .chat-panel,
+    .stream-panel {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .panel-title {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-desc {
+      margin: 0 0 18px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .quick-pill {
+      border: 1px solid rgba(15, 23, 42, 0.07);
+      background: rgba(255,255,255,0.86);
+      color: var(--text-secondary);
+      min-height: 38px;
+      padding: 0 14px;
+      font-size: 13px;
+      box-shadow: none;
+    }
+
+    .quick-pill:hover {
+      color: var(--text-primary);
+      background: #ffffff;
+    }
+
+    .stream-box {
+      min-height: 340px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(249,249,251,0.88));
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      border-radius: 24px;
+      padding: 22px;
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.85;
+      overflow: auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 980px) {
+      .card.small,
+      .card.large {
+        grid-column: span 12;
+      }
+
+      .chat-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 18px 12px 32px;
+      }
+
+      .hero {
+        padding: 28px 24px;
+        border-radius: 28px;
+      }
+
+      .card,
+      .chat-card {
+        padding: 22px;
+      }
+
+      .stream-box {
+        min-height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">Agentic-RAG · Apple Style Demo</div>
+      <h1>把智能问答、验证码流程和系统状态，放进一个更优雅的界面里。</h1>
+      <p>
+        这是当前课程项目的统一操作台。你可以在同一页面中检查服务状态、发送和校验验证码，
+        也可以直接体验医疗知识流式问答与代码证据检索能力。
+      </p>
+      <div class="hero-meta">
+        <span class="hero-chip">FastAPI</span>
+        <span class="hero-chip">MCP Tool Calling</span>
+        <span class="hero-chip">SSE Streaming</span>
+        <span class="hero-chip">Local Embedding + Reranker</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card small">
+        <div class="card-badge">系统状态</div>
+        <h2>系统检查</h2>
+        <p class="card-desc">快速确认主服务、本地模型路径、SQLite 与 MCP 地址是否处于可用状态。</p>
+        <div class="section-divider"></div>
+        <div class="actions">
+          <button id="healthButton" class="btn-primary" onclick="checkHealth()">获取系统状态</button>
+        </div>
+        <div id="healthResult" class="result">点击按钮后显示当前系统状态。</div>
+      </section>
+
+      <section class="card small">
+        <div class="card-badge">验证码流程</div>
+        <h2>发送验证码</h2>
+        <p class="card-desc">输入用户名后，系统会查询邮箱并在开发模式下生成验证码，便于本地联调。</p>
+        <div class="section-divider"></div>
+        <div class="form-row">
+          <label for="username">用户名</label>
+          <input id="username" value="cc" placeholder="例如 cc" />
+        </div>
+        <div class="actions">
+          <button id="sendButton" class="btn-primary" onclick="sendEmail()">发送验证码</button>
+        </div>
+        <div id="sendResult" class="result">这里会显示绑定邮箱与开发模式验证码。</div>
+      </section>
+
+      <section class="card small">
+        <div class="card-badge">验证码流程</div>
+        <h2>校验验证码</h2>
+        <p class="card-desc">从发送结果中复制验证码后可直接在此验证，适合测试完整认证链路。</p>
+        <div class="section-divider"></div>
+        <div class="form-row">
+          <label for="receiver">邮箱</label>
+          <input id="receiver" value="cc@example.com" placeholder="例如 cc@example.com" />
+        </div>
+        <div class="form-row">
+          <label for="code">验证码</label>
+          <input id="code" placeholder="从发送结果里复制验证码" />
+        </div>
+        <div class="actions">
+          <button id="verifyButton" class="btn-primary" onclick="verifyCode()">校验验证码</button>
+        </div>
+        <div id="verifyResult" class="result">这里会显示验证码是否校验成功。</div>
+      </section>
+
+      <section class="card large chat-card">
+        <div class="card-badge">Agentic-RAG 问答</div>
+        <h2>医疗知识流式问答</h2>
+        <p class="card-desc">支持图谱问答、知识库补充与代码证据检索。输入问题后，页面会实时显示 SSE 返回内容。</p>
+        <div class="chat-layout">
+          <div class="chat-panel">
+            <h3 class="panel-title">输入问题</h3>
+            <p class="panel-desc">你可以提问医疗知识，也可以问项目内部哪个文件负责某个功能。</p>
+            <div class="form-row">
+              <label for="chatMessage">问题内容</label>
+              <textarea id="chatMessage" placeholder="例如：糖尿病有什么症状？">糖尿病有什么症状？</textarea>
+            </div>
+            <div class="actions">
+              <button id="chatButton" class="btn-primary" onclick="streamChat()">开始流式问答</button>
+            </div>
+            <div class="quick-actions">
+              <button class="quick-pill" onclick="fillQuestion('高血压看哪个科室？')">高血压看哪个科室？</button>
+              <button class="quick-pill" onclick="fillQuestion('糖尿病不能吃什么？')">糖尿病不能吃什么？</button>
+              <button class="quick-pill" onclick="fillQuestion('哪个文件负责验证码校验？')">哪个文件负责验证码校验？</button>
+            </div>
+          </div>
+          <div class="stream-panel">
+            <h3 class="panel-title">实时输出</h3>
+            <p class="panel-desc">系统会把后端返回的流式结果逐段展示在这里。</p>
+            <div id="chatResult" class="stream-box">这里会显示流式返回内容。</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer-note">
+      这个前端页面由单文件静态页实现，保留现有课程项目接口不变，只升级视觉与交互体验。
+    </div>
+  </div>
+
+  <script>
+    function setResultState(element, state, text) {
+      element.className = element.id === 'chatResult' ? 'stream-box' : 'result';
+      if (element.id !== 'chatResult' && state) {
+        element.classList.add(`is-${state}`);
+      }
+      element.textContent = text;
+    }
+
+    function setButtonLoading(button, loading) {
+      button.disabled = loading;
+      if (!button.dataset.originalText) {
+        button.dataset.originalText = button.textContent;
+      }
+      button.textContent = loading ? '处理中…' : button.dataset.originalText;
+    }
+
+    async function checkHealth() {
+      const box = document.getElementById('healthResult');
+      const button = document.getElementById('healthButton');
+      setButtonLoading(button, true);
+      setResultState(box, 'loading', '正在获取系统状态...');
+      try {
+        const response = await fetch('/health');
+        const data = await response.json();
+        const available = data?.embedding_model_exists && data?.reranker_model_exists && data?.sqlite_ready;
+        if (available) {
+          setResultState(box, 'success', '系统现在是可用状态');
+        } else {
+          setResultState(box, 'error', '系统当前不可用，请检查模型文件、数据库或服务配置。');
+        }
+      } catch (error) {
+        setResultState(box, 'error', '系统检查失败：' + error.message);
+      } finally {
+        setButtonLoading(button, false);
+      }
+    }
+
+    async function sendEmail() {
+      const username = document.getElementById('username').value.trim();
+      const box = document.getElementById('sendResult');
+      const button = document.getElementById('sendButton');
+      if (!username) {
+        setResultState(box, 'error', '请先输入用户名');
+        return;
+      }
+      setButtonLoading(button, true);
+      setResultState(box, 'loading', '正在发送验证码...');
+      try {
+        const response = await fetch(`/sendEmail/${encodeURIComponent(username)}`);
+        const data = await response.json();
+        if (data?.data?.email) {
+          document.getElementById('receiver').value = data.data.email;
+        }
+        if (data?.data?.debug_code) {
+          document.getElementById('code').value = data.data.debug_code;
+        }
+        const message = data?.data?.message || `发送完成，已为用户 ${username} 生成验证码并发送。`;
+        setResultState(box, 'success', `发送完成，${message.replace(/。$/, '')}`);
+      } catch (error) {
+        setResultState(box, 'error', '发送失败：' + error.message);
+      } finally {
+        setButtonLoading(button, false);
+      }
+    }
+
+    async function verifyCode() {
+      const receiver = document.getElementById('receiver').value.trim();
+      const code = document.getElementById('code').value.trim();
+      const box = document.getElementById('verifyResult');
+      const button = document.getElementById('verifyButton');
+      if (!receiver || !code) {
+        setResultState(box, 'error', '请同时输入邮箱和验证码');
+        return;
+      }
+      setButtonLoading(button, true);
+      setResultState(box, 'loading', '正在校验验证码...');
+      try {
+        const response = await fetch(`/verifyCode/${encodeURIComponent(receiver)}/${encodeURIComponent(code)}`);
+        const data = await response.json();
+        const ok = data?.data?.verified === true || data?.code === 200;
+        setResultState(box, ok ? 'success' : 'error', ok ? '验证码验证成功' : '验证码验证失败');
+      } catch (error) {
+        setResultState(box, 'error', '校验失败：' + error.message);
+      } finally {
+        setButtonLoading(button, false);
+      }
+    }
+
+    function fillQuestion(text) {
+      document.getElementById('chatMessage').value = text;
+    }
+
+    async function streamChat() {
+      const message = document.getElementById('chatMessage').value.trim();
+      const box = document.getElementById('chatResult');
+      const button = document.getElementById('chatButton');
+      if (!message) {
+        box.textContent = '请先输入问题';
+        return;
+      }
+      setButtonLoading(button, true);
+      box.textContent = '正在生成回答...';
+      try {
+        const response = await fetch(`/chat?messages=${encodeURIComponent(message)}`);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+        box.textContent = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || '';
+
+          for (const part of parts) {
+            if (!part.startsWith('data: ')) continue;
+            const payload = part.slice(6);
+            if (payload === '[DONE]') {
+              box.scrollTop = box.scrollHeight;
+              return;
+            }
+            try {
+              const json = JSON.parse(payload);
+              box.textContent += json.content || '';
+            } catch (_) {
+              box.textContent += payload;
+            }
+            box.scrollTop = box.scrollHeight;
+          }
+        }
+      } catch (error) {
+        box.textContent = '流式问答失败：' + error.message;
+      } finally {
+        setButtonLoading(button, false);
+      }
+    }
+  </script>
+</body>
+</html>
